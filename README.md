@@ -1,12 +1,39 @@
 # mk321-remap
 
-Remap the buttons of the **PCsensor MK321** mini macro keyboard on Linux. No Windows,
-no ElfKey, no firmware flashing.
+Program and remap the buttons of the **PCsensor MK321** mini macro keyboard on Linux, with no
+Windows and no ElfKey.
 
-PCsensor's configuration tool (ElfKey) only runs on Windows and macOS. This tool leaves the
-keypad's firmware alone and remaps it in software instead. It takes exclusive control of the
-keypad's input nodes (your other keyboards aren't affected) and turns its key presses into
-whatever you configure:
+PCsensor's configuration tool (ElfKey) only runs on Windows and macOS. This tool gives you two
+ways to change what the buttons do on Linux:
+
+1. **Store keys on the keypad itself** (`mk321-remap hw`), like ElfKey does. The settings live
+   in the keypad's memory and work on any computer, with nothing installed.
+2. **Remap in software** (`mk321-remap run`). This can do much more than the keypad can store,
+   but it only works while it's running.
+
+### Store keys on the keypad
+
+```console
+$ mk321-remap hw read
+model: MK321U_V2.0
+  layer 1 button 1: f22
+  layer 1 button 2: f23
+  layer 1 button 3: f24
+
+$ mk321-remap hw set 1 ctrl+c
+layer 1 button 1: f22 -> leftctrl+c
+```
+
+Each button stores modifiers plus one key: `ctrl+shift+t`, `super+l`, `f13`, `volumeup`.
+There are 3 layers (`--layer 2`, `--layer 3`, or `hw read --all-layers`). Every write is
+read back and checked. The protocol is documented in [docs/PROTOCOL.md](docs/PROTOCOL.md).
+Media keys, mouse actions, text strings and macros aren't supported on the keypad yet; the
+software remapper can do those.
+
+### Remap in software
+
+The remapper takes exclusive control of the keypad's input nodes (your other keyboards aren't
+affected) and turns its key presses into whatever you configure:
 
 - **key combos**: `ctrl+shift+t`, held down for as long as you hold the button
 - **shell commands**: `notify-send hi`, `playerctl play-pause`, `obs-cmd …`
@@ -19,9 +46,11 @@ It works on X11 and Wayland because it uses evdev/uinput, below the display serv
 
 | Device | USB id | Status |
 |--------|--------|--------|
-| PCsensor MK321U (3 keys, USB) | `3553:c010` | tested. Buttons send `F22`/`F23`/`F24` out of the box |
-| Other PCsensor "DIY keyboard" / MK424 / MK623 / foot pedals | `3553:xxxx` | should work, set `device:` in the config |
-| Any other keyboard or macropad | any | works, set `device:` to its USB id |
+| PCsensor MK321U, firmware `MK321U_V2.0` (3 keys, USB + Bluetooth) | `3553:c010` | tested: `hw` and remapper. Buttons send `F22`/`F23`/`F24` out of the box |
+| Other PCsensor "DIY keyboard" / MK424 / MK623 / foot pedals | `3553:xxxx` | remapper should work (set `device:`); `hw` untested, try `hw --product <id> info` |
+| Any other keyboard or macropad | any | remapper works, set `device:` to its USB id |
+
+To program the keypad with `hw`, it must be connected by **USB cable** (not Bluetooth).
 
 Run `mk321-remap list` to see the USB ids of your input devices. If you get it working on
 another model, please open a PR adding it to this table.
@@ -132,12 +161,16 @@ mk321-remap run      # run the remapper (what the service does)
 mk321-remap listen   # print names of keys as you press them
 mk321-remap list     # list input devices with USB ids (* = MK321)
 mk321-remap check    # validate the config
+mk321-remap hw info                 # keypad model / firmware
+mk321-remap hw read [--all-layers]  # keys stored on the keypad
+mk321-remap hw set BUTTON COMBO [--layer N]   # store a key on the keypad
   -c, --config PATH  # default: ~/.config/mk321-remap/config.yaml
   -v, --verbose
 ```
 
 ## Troubleshooting
 
+- **`hw` says the keypad is not found**: it must be on a USB cable, and not passed through to a VM.
 - **"plugged in but this user cannot read it"**: the udev rule isn't active yet. Run
   `./install.sh --udev-only`, then unplug and replug the keypad. Alternatively, add yourself to
   the `input` group (`sudo usermod -aG input $USER`) and log in again.

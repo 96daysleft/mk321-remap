@@ -206,6 +206,35 @@ def cmd_check(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_hw(args: argparse.Namespace) -> int:
+    """Read/write the key settings stored in the keypad's own memory."""
+    from .hardware import BUTTONS, LAYERS, HardwareError, Keypad, KeySetting
+
+    vendor = args.vendor if args.vendor is not None else DEFAULT_VENDOR
+    product = args.product if args.product is not None else DEFAULT_PRODUCT
+    try:
+        with Keypad.open(vendor, product) as pad:
+            if args.hw_command == "info":
+                print(f"{pad.path}: {pad.identify() or 'no identify reply'}")
+            elif args.hw_command == "read":
+                print(f"model: {pad.identify()}")
+                layers = range(1, LAYERS + 1) if args.all_layers else [args.layer]
+                for layer in layers:
+                    for button in range(1, BUTTONS + 1):
+                        setting = pad.read_key(button, layer)
+                        print(f"  layer {layer} button {button}: {setting.describe()}")
+            elif args.hw_command == "set":
+                setting = KeySetting.from_combo(args.combo)
+                before = pad.read_key(args.button, args.layer)
+                stored = pad.write_key(args.button, setting, args.layer)
+                print(f"layer {args.layer} button {args.button}: "
+                      f"{before.describe()} -> {stored.describe()}")
+    except HardwareError as exc:
+        log.error("%s", exc)
+        return 1
+    return 0
+
+
 def _hex(value: str) -> int:
     return int(value, 16)
 
@@ -227,12 +256,26 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("list", help="list input devices and their USB ids")
     sub.add_parser("check", help="validate the config file")
 
+    hw = sub.add_parser("hw", help="read/write the keys stored on the keypad itself (like ElfKey)")
+    hw.add_argument("--vendor", type=_hex, help="USB vendor id in hex (default 3553)")
+    hw.add_argument("--product", type=_hex, help="USB product id in hex (default c010)")
+    hw_sub = hw.add_subparsers(dest="hw_command", required=True)
+    hw_sub.add_parser("info", help="show the keypad model/firmware")
+    hw_read = hw_sub.add_parser("read", help="show what each button is set to")
+    hw_read.add_argument("--layer", type=int, default=1, choices=[1, 2, 3])
+    hw_read.add_argument("--all-layers", action="store_true")
+    hw_set = hw_sub.add_parser("set", help="store a key combo on a button, e.g. `hw set 1 ctrl+c`")
+    hw_set.add_argument("button", type=int, choices=[1, 2, 3])
+    hw_set.add_argument("combo", help="modifiers plus at most one key, e.g. ctrl+shift+t, f13")
+    hw_set.add_argument("--layer", type=int, default=1, choices=[1, 2, 3])
+
     args = parser.parse_args(argv)
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,
         format="%(levelname)s %(message)s",
     )
-    handlers = {"run": cmd_run, "listen": cmd_listen, "list": cmd_list, "check": cmd_check}
+    handlers = {"run": cmd_run, "listen": cmd_listen, "list": cmd_list, "check": cmd_check,
+                "hw": cmd_hw}
     return handlers[args.command or "run"](args)
 
 
