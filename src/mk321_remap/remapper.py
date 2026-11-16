@@ -6,8 +6,8 @@ import logging
 import subprocess
 import threading
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable
 
 from evdev import InputEvent, UInput, ecodes
 

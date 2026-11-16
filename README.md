@@ -28,7 +28,7 @@ another model, please open a PR adding it to this table.
 
 ## Install
 
-Requires Python 3.9+ and a systemd-based desktop.
+Requires Python 3.10+ and a systemd-based desktop.
 
 ```bash
 git clone https://github.com/96daysleft/mk321-remap.git
