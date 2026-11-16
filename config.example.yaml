@@ -1,0 +1,43 @@
+# mk321-remap config
+# Default location: ~/.config/mk321-remap/config.yaml
+#
+# 1. Run `mk321-remap listen` and press each button / turn the knob.
+#    It prints the name each one sends (e.g. KEY_1, KEY_VOLUMEUP, REL_WHEEL_UP).
+# 2. Put those names under `mappings:` below.
+# 3. `mk321-remap check`, then `systemctl --user restart mk321-remap`.
+#
+# The trigger names below are examples - use whatever `listen` shows for
+# your keypad, since that depends on how its firmware was programmed.
+
+device:
+  vendor: "3553"   # PCsensor
+  product: "c010"  # MK321U "DIY keyboard" (check with `mk321-remap list`)
+
+# Keys that are not listed under `mappings` still work as normal.
+# Set this to false to silence everything that isn't mapped.
+passthrough: true
+
+mappings:
+  # Shorthand: a key combo. Held down for as long as you hold the button.
+  KEY_1: ctrl+c
+  KEY_2: ctrl+v
+
+  # Run a shell command (runs with your desktop session's environment).
+  KEY_3:
+    command: notify-send "MK321" "Button 3 pressed"
+
+  # Knob: one step per detent.
+  KEY_VOLUMEUP: volumeup
+  KEY_VOLUMEDOWN: volumedown
+
+  # Macro: a list of steps run in order.
+  # Steps: keys (tap a combo), type (US-layout text), command, sleep (seconds).
+  KEY_MUTE:
+    - keys: super
+    - sleep: 0.3
+    - type: "terminal"
+    - keys: enter
+
+  # If the knob sends a scroll wheel instead of keys:
+  # REL_WHEEL_UP: ctrl+tab
+  # REL_WHEEL_DOWN: ctrl+shift+tab

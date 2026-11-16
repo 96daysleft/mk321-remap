@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mk321-remap"
+dynamic = ["version"]
+description = "Remap the buttons and knob of the PCsensor MK321 mini macro keyboard on Linux"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = ["evdev>=1.6", "PyYAML>=6"]
+keywords = ["macropad", "keyboard", "remap", "evdev", "uinput", "pcsensor", "mk321"]
+classifiers = [
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Hardware",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff>=0.4"]
+
+[project.urls]
+Homepage = "https://github.com/96daysleft/mk321-remap"
+Issues = "https://github.com/96daysleft/mk321-remap/issues"
+
+[project.scripts]
+mk321-remap = "mk321_remap.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "mk321_remap.__version__" }
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["UP007"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

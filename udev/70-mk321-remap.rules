@@ -1,0 +1,5 @@
+# Give the logged-in desktop user access to the PCsensor MK321 keypad and to
+# /dev/uinput, so mk321-remap can run as a normal user (no 'input' group needed).
+# Must sort before 73-seat-late.rules for TAG+="uaccess" to take effect.
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="3553", ATTRS{idProduct}=="c010", TAG+="uaccess"
+KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess"
