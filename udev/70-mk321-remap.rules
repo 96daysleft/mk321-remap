@@ -3,3 +3,5 @@
 # Must sort before 73-seat-late.rules for TAG+="uaccess" to take effect.
 SUBSYSTEM=="input", KERNEL=="event*", ATTRS{idVendor}=="3553", ATTRS{idProduct}=="c010", TAG+="uaccess"
 KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess"
+# Configuration interface (hidraw), used to read/write the keypad's stored key settings.
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3553", ATTRS{idProduct}=="c010", TAG+="uaccess"

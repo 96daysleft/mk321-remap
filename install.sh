@@ -41,6 +41,7 @@ as_root() {
 reload_udev() {
   as_root udevadm control --reload-rules
   as_root udevadm trigger --subsystem-match=input --action=change
+  as_root udevadm trigger --subsystem-match=hidraw --action=change
   as_root udevadm trigger --subsystem-match=misc --sysname-match=uinput --action=change
 }
 

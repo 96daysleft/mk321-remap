@@ -1,6 +1,6 @@
 # mk321-remap
 
-Remap the buttons and knob of the **PCsensor MK321** mini macro keyboard on Linux. No Windows,
+Remap the buttons of the **PCsensor MK321** mini macro keyboard on Linux. No Windows,
 no ElfKey, no firmware flashing.
 
 PCsensor's configuration tool (ElfKey) only runs on Windows and macOS. This tool leaves the
@@ -19,7 +19,7 @@ It works on X11 and Wayland because it uses evdev/uinput, below the display serv
 
 | Device | USB id | Status |
 |--------|--------|--------|
-| PCsensor MK321U (3 keys + knob, USB) | `3553:c010` | tested. Buttons send `F22`/`F23`/`F24` out of the box |
+| PCsensor MK321U (3 keys, USB) | `3553:c010` | tested. Buttons send `F22`/`F23`/`F24` out of the box |
 | Other PCsensor "DIY keyboard" / MK424 / MK623 / foot pedals | `3553:xxxx` | should work, set `device:` in the config |
 | Any other keyboard or macropad | any | works, set `device:` to its USB id |
 
