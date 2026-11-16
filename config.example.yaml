@@ -19,11 +19,12 @@ passthrough: true
 
 mappings:
   # Shorthand: a key combo. Held down for as long as you hold the button.
-  KEY_1: ctrl+c
-  KEY_2: ctrl+v
+  # The MK321U ships with its 3 buttons sending F22 / F23 / F24.
+  KEY_F22: ctrl+c
+  KEY_F23: ctrl+v
 
   # Run a shell command (runs with your desktop session's environment).
-  KEY_3:
+  KEY_F24:
     command: notify-send "MK321" "Button 3 pressed"
 
   # Knob: one step per detent.

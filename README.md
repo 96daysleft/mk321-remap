@@ -19,7 +19,7 @@ It works on X11 and Wayland because it uses evdev/uinput, below the display serv
 
 | Device | USB id | Status |
 |--------|--------|--------|
-| PCsensor MK321U (3 keys + knob, USB) | `3553:c010` | tested |
+| PCsensor MK321U (3 keys + knob, USB) | `3553:c010` | tested. Buttons send `F22`/`F23`/`F24` out of the box |
 | Other PCsensor "DIY keyboard" / MK424 / MK623 / foot pedals | `3553:xxxx` | should work, set `device:` in the config |
 | Any other keyboard or macropad | any | works, set `device:` to its USB id |
 
@@ -56,8 +56,8 @@ Find out what each button sends:
 $ mk321-remap listen
 Listening on /dev/input/event10, /dev/input/event11, /dev/input/event13 - press keys, Ctrl+C to quit.
 
-KEY_1                  pressed
-KEY_1                  released
+KEY_F22                pressed
+KEY_F22                released
 KEY_VOLUMEUP           pressed
 KEY_VOLUMEUP           released
 ```
@@ -72,10 +72,10 @@ device:
 passthrough: true   # unmapped keys behave normally
 
 mappings:
-  KEY_1: ctrl+c                 # shorthand for a key combo
-  KEY_2: ctrl+v
+  KEY_F22: ctrl+c               # shorthand for a key combo
+  KEY_F23: ctrl+v
 
-  KEY_3:
+  KEY_F24:
     command: playerctl play-pause
 
   KEY_VOLUMEUP: volumeup
