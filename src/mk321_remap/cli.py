@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import logging
 import signal
+import subprocess
 import sys
 import threading
 import time
@@ -123,15 +124,17 @@ def cmd_listen(args: argparse.Namespace) -> int:
     vendor = args.vendor if args.vendor is not None else cfg.vendor
     product = args.product if args.product is not None else cfg.product
     stop = _stop_event()
-    devices = _wait_for_devices(vendor, product, stop, once=True)
-    if not devices:
-        if not present_in_sysfs(vendor, product):
-            log.error("device %04x:%04x not found (see `mk321-remap list`)", vendor, product)
-        return 1
-    print(f"Listening on {', '.join(d.path for d in devices)} - press keys, Ctrl+C to quit.")
-    print("Use the names on the left as keys under `mappings:` in your config.\n")
+    paused = _pause_service()
     try:
+        devices = _wait_for_devices(vendor, product, stop, once=True)
+        if not devices:
+            if not present_in_sysfs(vendor, product):
+                log.error("device %04x:%04x not found (see `mk321-remap list`)", vendor, product)
+            return 1
         with grabbed(devices):
+            print(f"Listening on {', '.join(d.path for d in devices)} - "
+                  "press keys, Ctrl+C to quit.")
+            print("Use the names on the left as keys under `mappings:` in your config.\n")
             for event in read_events(devices, stop):
                 line = _describe(event, cfg)
                 if line:
@@ -141,7 +144,38 @@ def cmd_listen(args: argparse.Namespace) -> int:
     except RuntimeError as exc:
         log.error("%s", exc)
         return 1
+    finally:
+        if paused:
+            _resume_service()
     return 0
+
+
+SERVICE = "mk321-remap.service"
+
+
+def _systemctl(*args: str) -> bool:
+    try:
+        return subprocess.run(
+            ["systemctl", "--user", *args, SERVICE],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False,
+        ).returncode == 0
+    except FileNotFoundError:
+        return False
+
+
+def _pause_service() -> bool:
+    """Stop the background service (it holds the keypad) while listening."""
+    if not _systemctl("is-active", "--quiet"):
+        return False
+    print(f"Pausing {SERVICE} while listening (it will be restarted on exit).")
+    return _systemctl("stop")
+
+
+def _resume_service() -> None:
+    if _systemctl("start"):
+        print(f"\nRestarted {SERVICE}.")
+    else:
+        log.warning("could not restart %s; run: systemctl --user start %s", SERVICE, SERVICE)
 
 
 def cmd_list(args: argparse.Namespace) -> int:
